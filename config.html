@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Guild Wars 2 API Test</title>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"></meta>
+<meta name="viewport" content="width=320, initial-scale=1, maximum-scale=1">
+<link href='css/bootstrap.min.css' rel='stylesheet' media='screen'></link>
+<link rel="stylesheet" href="css/bootstrap-switch.css"></link>
+<link href='css/wvwtimers-widget-style.css' rel='stylesheet' media='screen'></link>
+<script type='text/javascript' src='js/jquery-1.9.1.min.js' ></script>
+<script type='text/javascript' src='js/bootstrap.min.js'></script>
+<script src="js/bootstrap-switch.js"></script>
+</head>
+<body>
+<div class="navbar">
+  <div class="navbar-inner" style="padding-left:0;padding-right:0;">
+  <ul class="nav pull-left">
+    <li><a href="index.html"><i class=" icon-chevron-left" style="font-size:30px;"></i></a></li>
+    <li class="divider-vertical"></li>
+  </ul>	
+  <a class="brand" href="#">Settings</a>
+  </div>
+</div>
+<center>
+<div class="btn-group" style="display:block;">
+  <button class="btn" id="lang-en"><i class="flag-en"></i></button>
+  <button class="btn" id="lang-es"><i class="flag-es"></i></button>
+  <button class="btn" id="lang-fr"><i class="flag-fr"></i></button>
+  <button class="btn" id="lang-de"><i class="flag-de"></i></button>
+</div>
+<h3 id="OptionsTitle"></h3>
+<table width="300px">
+<tr><td width="110px">
+<div id="score-switch" class="make-switch" data-on-label="I" data-off-label="O"><input type="checkbox"></div>
+</td><td style="text-align:left;">
+<span id="showScores"></span>
+</td></tr>
+<tr><td width="110px">
+<div id="listOrMap-switch" class="make-switch" data-on-label="I" data-off-label="O"><input type="checkbox"></div>
+</td><td style="text-align:left;">
+<span id="mapMode"></span>
+</td></tr>
+</table>
+</br>
+</br>
+<div class="WvWTimers-serverlist">
+    <ul class="nav nav-tabs" id="myTab">
+    <li class="active"><a id="textTabNA" href="#NAserverList"></a></li>
+    <li><a id="textTabEU" href="#EUserverList"></a></li>
+    </ul>
+
+    <div class="tab-content">
+    <div class="tab-pane active" id="NAserverList"></div>
+    <div class="tab-pane" id="EUserverList"></div>
+    </div>
+     
+    <script>
+    $('#myTab a').click(function (e) {
+    e.preventDefault();
+    $(this).tab('show');
+    })
+    </script>
+</div>
+</center>
+<script type="text/javascript">
+function loadServerList()
+{
+  $.getJSON("https://api.guildwars2.com/v1/world_names.json?lang="+localStorage.lang, function (world_names) {
+    $.each(world_names, function(index, value) {
+      var foo ="";
+      if(value.id < "2000")
+        foo ="#NAserverList";
+      else
+        foo ="#EUserverList";
+
+      var cl = "serverbox";
+      if (localStorage.server_id != undefined && localStorage.server_id == value.id)
+        cl += " active";
+      $(foo).append("<div class='"+cl+"' id='"+value.id+"'>"+value.name+"</div>");
+    });
+
+
+    $(".serverbox").click(function(){
+      $(".serverbox").removeClass("active");
+      $(this).addClass("active");
+      localStorage.server_id = $(this).attr("id");
+      window.location ="index.html";
+    });
+
+  });
+}
+
+$(document).ready(function(){
+  if(localStorage.server_id != undefined)
+  {
+    if(localStorage.server_id < "2000")
+    {
+      $('#myTab a:first').tab('show');
+    }
+    else
+    {
+      $('#myTab a:last').tab('show');
+    }
+
+  }
+
+  if (localStorage.show_scores == undefined)
+  {
+    localStorage.show_scores = "true";
+  };
+  if (localStorage.show_maps == undefined)
+  {
+    localStorage.show_maps = "false";
+  };
+
+    $('#score-switch').bootstrapSwitch('setState', (localStorage.show_scores == "true"));
+    $('#listOrMap-switch').bootstrapSwitch('setState', (localStorage.show_maps == "true"));
+
+
+  $('#score-switch').on('switch-change', function (e, data) {
+  var $el = $(data.el)
+  , value = data.value;
+  localStorage.show_scores = value;
+  });
+
+  $('#listOrMap-switch').on('switch-change', function (e, data) {
+  var $el = $(data.el)
+  , value = data.value;
+  localStorage.show_maps = value;
+  });
+
+  $("#btn-set").click(function(){
+    localStorage.server_id = $("#appendedInputButton").val();
+    window.location = "index.html";
+  });
+
+  if(localStorage.lang == undefined)
+  {
+    localStorage.lang = "en";
+    $("#OptionsTitle").text("Options");
+    $("#showScores").text("Show scores");
+    $("#mapMode").text("Enable map view");
+    $("#lang-en").addClass("active");
+    $("#textTabNA").text("North America");
+    $("#textTabEU").text("European Union");
+  }
+  else
+  {
+    $("#lang-"+localStorage.lang).addClass("active");
+    if(localStorage.lang == "es")
+    {
+      $("#OptionsTitle").text("Opciones");
+      $("#showScores").text("Mostrar puntuaciones");
+      $("#mapMode").text("Activar vista de mapa");
+      $("#textTabNA").text("Norte America");
+      $("#textTabEU").text("Unión Europea");
+      $(".brand").text("Configuración");
+    }
+    else if (localStorage.lang == "en")
+    {
+      $("#OptionsTitle").text("Options");
+      $("#showScores").text("Show scores");
+      $("#mapMode").text("Enable map view");
+      $("#textTabNA").text("North America");
+      $("#textTabEU").text("European Union");
+      $(".brand").text("Settings");
+    }
+    else if (localStorage.lang == "fr")
+    {
+      $("#OptionsTitle").text("Options");
+      $("#showScores").text("Afficher scores");
+      $("#mapMode").text("Activer vue de carte");
+      $("#textTabNA").text("Amérique du Nord");
+      $("#textTabEU").text("Union européenne");
+      $(".brand").text("Réglages");
+    }
+    else if (localStorage.lang == "de")
+    {
+      $("#OptionsTitle").text("Optionen");
+      $("#showScores").text("Zeigen Partituren");
+      $("#mapMode").text("Aktivieren der karte anzeigen");
+      $("#textTabNA").text("Nordamerika");
+      $("#textTabEU").text("Europäische Union");
+      $(".brand").text("Einstellungen");
+    }
+  }
+
+  $("#lang-es").click(function()
+  {
+    $("#lang-en").removeClass("active");
+    $("#lang-fr").removeClass("active");
+    $("#lang-de").removeClass("active");
+    $("#lang-es").addClass("active");
+    localStorage.lang = "es";
+    $("#NAserverList").empty();
+    $("#EUserverList").empty();
+    $("#OptionsTitle").text("Opciones");
+    $("#showScores").text("Mostrar puntuaciones");
+    $("#mapMode").text("Activar vista de mapa");
+    $("#textTabNA").text("Norte America");
+    $("#textTabEU").text("Unión Europea");
+    $(".brand").text("Configuración");
+    loadServerList();
+  });
+
+  $("#lang-en").click(function()
+  {
+    $("#lang-es").removeClass("active");
+    $("#lang-fr").removeClass("active");
+    $("#lang-de").removeClass("active");
+    $("#lang-en").addClass("active");
+    localStorage.lang = "en";
+    $("#NAserverList").empty();
+    $("#EUserverList").empty();
+    $("#OptionsTitle").text("Options");
+    $("#showScores").text("Show scores");
+    $("#mapMode").text("Enable map view");
+    $("#textTabNA").text("North America");
+    $("#textTabEU").text("European Union");
+    $(".brand").text("Settings");
+    loadServerList();
+  });
+
+    $("#lang-fr").click(function()
+  {
+    $("#lang-en").removeClass("active");
+    $("#lang-es").removeClass("active");
+    $("#lang-de").removeClass("active");
+    $("#lang-fr").addClass("active");
+    localStorage.lang = "fr";
+    $("#NAserverList").empty();
+    $("#EUserverList").empty();
+    $("#OptionsTitle").text("Options");
+    $("#showScores").text("Afficher scores");
+    $("#mapMode").text("Activer vue de carte");
+    $("#textTabNA").text("Amérique du Nord");
+    $("#textTabEU").text("Union européenne");
+    $(".brand").text("Réglages");
+    loadServerList();
+  });
+
+    $("#lang-de").click(function()
+  {
+    $("#lang-en").removeClass("active");
+    $("#lang-fr").removeClass("active");
+    $("#lang-es").removeClass("active");
+    $("#lang-de").addClass("active");
+    localStorage.lang = "de";
+    $("#NAserverList").empty();
+    $("#EUserverList").empty();
+    $("#OptionsTitle").text("Optionen");
+    $("#showScores").text("Zeigen Partituren");
+    $("#mapMode").text("Aktivieren der karte anzeigen");
+    $("#textTabNA").text("Nordamerika");
+    $("#textTabEU").text("Europäische Union");
+    $(".brand").text("Einstellungen");
+    loadServerList();
+  });
+
+  loadServerList();
+});
+</script>
+</body>
+</html>
